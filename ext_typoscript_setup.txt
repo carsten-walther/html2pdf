@@ -1,0 +1,148 @@
+html2pdf = PAGE
+html2pdf < page
+html2pdf {
+
+    typeNum = 8080
+
+    config {
+
+        absRefPrefix = /
+
+        baseURL = http://www.website.com/
+
+        additionalHeaders {
+
+            10 {
+                header = Content-Type: application/pdf
+                replace = 1
+            }
+
+            20 {
+                header = Content-Disposition: inline; filename=download.pdf
+                replace = 1
+            }
+
+            30 {
+                header = Cache-control: public, must-revalidate, max-age=0
+                replace = 1
+            }
+
+            40 {
+                header = Pragma: public
+                replace = 1
+            }
+
+            50 {
+                header = Expires: 0
+                replace = 1
+            }
+
+            60 {
+                header = X-Powered-By: wkhtmltopdf
+                replace = 1
+            }
+        }
+
+        tx_html2pdf {
+
+            enable = 1
+            enable.if.isFalse.data = TSFE:no_cache // field:no_cache // field:no_search
+
+            binOptions {
+
+                encoding = utf-8
+
+                # Portrait|Landscape
+                orientation = Portrait
+
+                # A4|Letter|Legal
+                page-size = A4
+                # values in mm
+                page-width = 210
+                # values in mm
+                page-height = 297
+                page-offset = 0
+
+                zoom = 1.0
+
+                dpi = 96
+
+                image-dpi = 96
+                image-quality = 90
+
+                # values in mm
+                margin-bottom = 20
+                margin-left = 20
+                margin-right = 20
+                margin-top = 20
+
+                # value in mm
+                header-spacing = 10
+                header-font-size = 10
+                # values as string
+                #header-left =
+                header-center = [title]
+                #header-right =
+
+                # value in mm
+                footer-spacing = 10
+                footer-font-size = 8
+                # values as string
+                footer-left = [date] - [time]
+                footer-center = (C) My Company, 2019
+                footer-right = [page] of [topage]
+
+                # options without values
+                #header-line =
+                #footer-line =
+                lowquality =
+                enable-javascript =
+                no-outline =
+                grayscale =
+            }
+        }
+    }
+
+    /*
+    [page]       Replaced by the number of the pages currently being printed
+    [frompage]   Replaced by the number of the first page to be printed
+    [topage]     Replaced by the number of the last page to be printed
+    [webpage]    Replaced by the URL of the page being printed
+    [section]    Replaced by the name of the current section
+    [subsection] Replaced by the name of the current subsection
+    [date]       Replaced by the current date in system local format
+    [isodate]    Replaced by the current date in ISO 8601 extended format
+    [time]       Replaced by the current time in system local format
+    [title]      Replaced by the title of the of the current page object
+    [doctitle]   Replaced by the title of the output document
+    [sitepage]   Replaced by the number of the page in the current site being converted
+    [sitepages]  Replaced by the number of pages in the current site being converted
+    */
+
+    headerData {
+        8080 = TEXT
+        8080.value (
+        <script>
+          function subst() {
+              var vars = {};
+              var query_strings_from_url = document.location.search.substring(1).split('&');
+              for (var query_string in query_strings_from_url) {
+                  if (query_strings_from_url.hasOwnProperty(query_string)) {
+                      var temp_var = query_strings_from_url[query_string].split('=', 2);
+                      vars[temp_var[0]] = decodeURI(temp_var[1]);
+                  }
+              }
+              var css_selector_classes = ['page', 'frompage', 'topage', 'webpage', 'section', 'subsection', 'date', 'isodate', 'time', 'title', 'doctitle', 'sitepage', 'sitepages'];
+              for (var css_class in css_selector_classes) {
+                  if (css_selector_classes.hasOwnProperty(css_class)) {
+                      var element = document.getElementsByClassName(css_selector_classes[css_class]);
+                      for (var j = 0; j < element.length; ++j) {
+                          element[j].textContent = vars[css_selector_classes[css_class]];
+                      }
+                  }
+              }
+          }
+          </script>
+        )
+    }
+}

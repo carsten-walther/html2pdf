@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="cz_wkhtmltopdf" xmlns="http://www.w3.org/2000/svg"
+     x="0px" y="0px"
+     viewBox="0 0 64 64" style="enable-background:new 0 0 64 64;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#C91E11;}
+</style>
+    <style type="text/css">
+	.st0{fill:#C91E11;}
+	.st1{fill:#FFFFFF;}
+</style>
+    <rect class="st0" width="64" height="64"/>
+    <g>
+	<path class="st1" d="M10.7,4.1h7.6c3.9,0,5.4,2.4,5.4,6c0,2.3-0.7,5.9-5.6,5.9H15v8.2h-4.2L10.7,4.1L10.7,4.1z M14.9,13h2.4
+		c1.3,0,2.1-1.4,2.1-2.7c0-1.7-0.4-3.1-2.4-3.1h-2.1V13z"/>
+        <path class="st1" d="M26.3,4.1h7.1c5.5,0,6.6,3.7,6.6,10c0,3.1,0.5,10.2-6.7,10.2h-6.9L26.3,4.1L26.3,4.1z M30.5,21.2h2
+		c2.6,0,3.1-1.9,3.1-7c0-3.7,0-7-2.9-7h-2.2C30.5,7.2,30.5,21.2,30.5,21.2z"/>
+        <path class="st1" d="M43.2,24.3V4.1h10.5v3.1h-6.3v5.2h6v3.1h-6v8.8H43.2z"/>
+</g>
+    <g>
+	<polygon class="st1" points="7,28 7,64 10,64 10,31 54,31 54,64 57,64 57,28 	"/>
+        <rect x="12.2" y="37" class="st1" width="17.7" height="3"/>
+        <rect x="12.2" y="42" class="st1" width="23.8" height="3"/>
+        <rect x="12.2" y="47" class="st1" width="23.8" height="3"/>
+        <rect x="12.2" y="52" class="st1" width="39.8" height="3"/>
+        <rect x="12.2" y="57" class="st1" width="39.8" height="3"/>
+</g>
+</svg>

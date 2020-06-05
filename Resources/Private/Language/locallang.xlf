@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+	<file source-language="en" datatype="plaintext" original="messages" date="2018-03-21T15:15:00Z" product-name="html2pdf">
+		<header/>
+		<body>
+
+			<!-- Messages Report -->
+
+			<trans-unit id="html2pdf.report.check.configuration.title">
+				<source>Configuration</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.configuration.description">
+				<source>Please go to the Extension Manager Settings and hit the "Update" button of the configuration of html2pdf.</source>
+			</trans-unit>
+
+			<trans-unit id="html2pdf.report.check.proc_open.title">
+				<source>PHP: proc_open()</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.proc_open.description">
+				<source>proc_open() is need to call the wkhtmltopdf binary. If it is disabled please ask your Administrator or Hoster for help.</source>
+			</trans-unit>
+
+			<trans-unit id="html2pdf.report.check.binary.title">
+				<source>Binaries</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.binary.description">
+				<source>The path to the binary is not configured. Please head over to the Extension Manager Settings and configure the path in the configuration of html2pdf.</source>
+			</trans-unit>
+
+			<trans-unit id="html2pdf.report.check.generation.success.title">
+				<source>PDF Generation</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.generation.success.description">
+				<source>PDF generated successfully.</source>
+			</trans-unit>
+
+			<trans-unit id="html2pdf.report.check.generation.error.title">
+				<source>PDF Generation</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.generation.error.description">
+				<source>PDF generation failed. Error Code: </source>
+			</trans-unit>
+
+			<trans-unit id="html2pdf.report.check.operating_system.title">
+				<source>Operating System</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.operating_system.missing.windows.description">
+				<source><![CDATA[html2pdf does not have Windows binaries bundled. You can <a href="http://code.google.com/p/wkhtmltopdf/downloads/list" target="_blank">download them</a>. Make sure your server has the necessary binary installed and set it in the Extension Configuration.]]></source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.operating_system.missing.darwin.description">
+				<source><![CDATA[html2pdf does not have MAC OS X binaries bundled. You can <a href="http://code.google.com/p/wkhtmltopdf/downloads/list" target="_blank">download them</a>. Make sure your server has the necessary binary installed and set it in the Extension Configuration.]]></source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.operating_system.missing.unknown.description">
+				<source><![CDATA[Support for your operating system is unknown. Check the <a href="http://code.google.com/p/wkhtmltopdf/downloads/list" target="_blank">download page of wkhtmltopdf</a> for binaries for your Operating System.]]></source>
+			</trans-unit>
+
+			<trans-unit id="html2pdf.report.check.contentPostProc.title">
+				<source>Hook: contentPostProc-output</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.contentPostProc.used.by">
+				<source>used by</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.contentPostProc.used.description">
+				<source>Make sure the classes calling the hook don't influence each other negatively: </source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.contentPostProc.description">
+				<source>html2pdf is the only extension using this hook.</source>
+			</trans-unit>
+
+			<trans-unit id="html2pdf.report.check.pageIndexing.title">
+				<source>Hook: pageIndexing</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.pageIndexing.used.by">
+				<source>used by</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.pageIndexing.used.description">
+				<source>Make sure the classes calling the hook don't influence each other negatively: </source>
+			</trans-unit>
+			<trans-unit id="html2pdf.report.check.pageIndexing.description">
+				<source>html2pdf is the only extension using this hook.</source>
+			</trans-unit>
+
+			<!-- Error Messages Controller -->
+
+			<trans-unit id="html2pdf.controller.throw404">
+				<source>PDF generation was disabled for this page.</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.controller.converter.init.error">
+				<source>Converter could not be initialized.</source>
+			</trans-unit>
+
+			<!-- Error Messages Config -->
+
+			<trans-unit id="html2pdf.config.set.error">
+				<source>The value "%s" must be a string or array.</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.config.get.error">
+				<source>The value "%s" was not set. Did you update the Extensions settings of "%s"?</source>
+			</trans-unit>
+
+			<!-- Error Messages Converter -->
+
+			<trans-unit id="html2pdf.converter.binary.error">
+				<source>No binary for wkhtmltopdf was specified.</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.converter.generator.error.returnCode">
+				<source>A shell error occured while trying to run wkhtmltopdf: </source>
+			</trans-unit>
+			<trans-unit id="html2pdf.converter.generator.error.stderr">
+				<source>wkhtmltopdf threw an error when trying to create a PDF. Developers see the developer log for more information.</source>
+			</trans-unit>
+			<trans-unit id="html2pdf.converter.generator.error.stdout">
+				<source>wkhtmltopdf did not return anything when trying to create a PDF. Developers see the developer log for more information.</source>
+			</trans-unit>
+
+
+		</body>
+	</file>
+</xliff>

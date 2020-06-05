@@ -1,0 +1,5 @@
+# cat=basic/enable/10; type=options[wkhtmltopdf-0.12.4_linux-generic-i386,wkhtmltopdf-0.12.4_linux-generic-amd64,custom]; label=Select a wkhtmltopdf binary to use.
+binPath = wkhtmltopdf-0.12.4_linux-generic-amd64
+
+# cat=basic/enable/20; type=string; label=Custom wkhtmltopdf binary. Don't forget to enable it with the option above.
+binPathCustom =
