@@ -6,13 +6,14 @@
 		"TYPO3",
 		"extension",
 		"html",
+		"to",
 		"pdf",
 		"html2pdf"
 	],
 	"homepage": "https://carstenwalther.de",
 	"license": "GPL-3.0-or-later",
 	"require": {
-		"typo3/cms-core": "^9.5.0"
+		"typo3/cms-core": "9.5.0-10.4.99"
 	},
 	"extra": {
 		"typo3/cms": {

@@ -1,12 +1,17 @@
 <?php
 
-namespace Walther\Html2Pdf;
+namespace Walther\Html2pdf\Configuration;
+
+use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException;
 
 /**
- * Class Config
- * @package Walther\Html2Pdf
+ * Class Configuration
+ *
+ * @package Walther\Html2pdf\Configuration
  */
-class Config
+class Configuration
 {
     /**
      * EXTENSION_KEY
@@ -19,22 +24,18 @@ class Config
     protected static $data = [];
 
     /**
-     * @var \TYPO3\CMS\Extbase\Object\ObjectManager
-     */
-    protected $objectManager;
-
-    /**
      * @var \TYPO3\CMS\Core\Localization\LanguageService
      */
     protected static $languageService;
 
     /**
-     * Report constructor.
+     * Configuration constructor.
+     *
+     * @param \TYPO3\CMS\Core\Localization\LanguageService $languageService
      */
-    public function __construct()
+    public function __construct(LanguageService $languageService)
     {
-        $this->objectManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\Object\ObjectManager::class);
-        self::$languageService = $this->objectManager->get(\TYPO3\CMS\Core\Localization\LanguageService::class);
+        self::$languageService = $languageService;
         self::$languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
     }
 
@@ -55,23 +56,7 @@ class Config
         } elseif (is_array($name)) {
             self::$data = array_merge(self::$data, $name);
         } else {
-            throw new \TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException(sprintf(self::$languageService->getLL('html2pdf.config.set.error'), $name, self::EXTENSION_KEY));
-        }
-    }
-
-    /**
-     * init
-     *
-     * initializing method that will be called as soon as it is needed
-     */
-    protected static function init() : void
-    {
-        if (empty(self::$data)) {
-            if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger(TYPO3_version) >= 9000000) {
-                self::$data = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][self::EXTENSION_KEY];
-            } else {
-                self::$data = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][self::EXTENSION_KEY], NULL);
-            }
+            throw new InvalidArgumentException(sprintf(self::$languageService->getLL('html2pdf.config.set.error'), $name, self::EXTENSION_KEY));
         }
     }
 
@@ -91,7 +76,7 @@ class Config
             return self::get('binPathCustom');
         }
 
-        return \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath(self::EXTENSION_KEY, 'Vendor/wkhtmltopdf/' . $binPath);
+        return ExtensionManagementUtility::extPath(self::EXTENSION_KEY, 'Vendor/wkhtmltopdf/' . $binPath);
     }
 
     /**
@@ -107,10 +92,22 @@ class Config
         self::init();
 
         if (!self::exists($name)) {
-            throw new \TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException(sprintf(self::$languageService->getLL('html2pdf.config.get.error'), $name, self::EXTENSION_KEY));
+            throw new InvalidArgumentException(sprintf(self::$languageService->getLL('html2pdf.config.get.error'), $name, self::EXTENSION_KEY));
         }
 
         return self::$data[$name];
+    }
+
+    /**
+     * init
+     *
+     * initializing method that will be called as soon as it is needed
+     */
+    protected static function init() : void
+    {
+        if (empty(self::$data)) {
+            self::$data = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][self::EXTENSION_KEY];
+        }
     }
 
     /**
@@ -125,6 +122,7 @@ class Config
     public static function exists($name) : bool
     {
         self::init();
+
         return is_array(self::$data) && array_key_exists($name, self::$data);
     }
 }

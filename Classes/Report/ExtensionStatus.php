@@ -1,12 +1,20 @@
 <?php
 
-namespace Walther\Html2Pdf;
+namespace Walther\Html2pdf\Report;
+
+use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException;
+use TYPO3\CMS\Reports\Status;
+use TYPO3\CMS\Reports\StatusProviderInterface;
+use Walther\Html2pdf\Configuration\Configuration;
 
 /**
- * Class Report
- * @package Walther\Html2Pdf
+ * Class ExtensionStatus
+ *
+ * @package Walther\Html2pdf\Report
  */
-class Report implements \TYPO3\CMS\Reports\StatusProviderInterface
+class ExtensionStatus implements StatusProviderInterface
 {
     /**
      * @var array
@@ -14,22 +22,18 @@ class Report implements \TYPO3\CMS\Reports\StatusProviderInterface
     protected $reports = [];
 
     /**
-     * @var \TYPO3\CMS\Extbase\Object\ObjectManager
-     */
-    protected $objectManager;
-
-    /**
      * @var \TYPO3\CMS\Core\Localization\LanguageService
      */
     protected $languageService;
 
     /**
-     * Report constructor.
+     * ExtensionStatus constructor.
+     *
+     * @param \TYPO3\CMS\Core\Localization\LanguageService $languageService
      */
-    public function __construct()
+    public function __construct(LanguageService $languageService)
     {
-        $this->objectManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\Object\ObjectManager::class);
-        $this->languageService = $this->objectManager->get(\TYPO3\CMS\Core\Localization\LanguageService::class);
+        $this->languageService = $languageService;
         $this->languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
     }
 
@@ -41,7 +45,7 @@ class Report implements \TYPO3\CMS\Reports\StatusProviderInterface
      * @return array
      * @throws \TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException
      */
-    public function getStatus()
+    public function getStatus() : array
     {
         $this->reports = [];
 
@@ -71,20 +75,17 @@ class Report implements \TYPO3\CMS\Reports\StatusProviderInterface
         $pass = false;
 
         try {
-
-            \Walther\Html2Pdf\Config::getBinaryPath();
+            Configuration::getBinaryPath();
             $pass = true;
-
-        } catch (\TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException $e) {
-
+        } catch (InvalidArgumentException $e) {
             // ...
         }
 
-        $this->reports[] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Reports\Status::class,
+        $this->reports[] = GeneralUtility::makeInstance(Status::class,
             $this->languageService->getLL('html2pdf.report.check.configuration.title'),
             $pass ? 'OK' : 'Error',
             $pass ? '' : $this->languageService->getLL('html2pdf.report.check.configuration.description'),
-            $pass ? \TYPO3\CMS\Reports\Status::OK : \TYPO3\CMS\Reports\Status::ERROR
+            $pass ? Status::OK : Status::ERROR
         );
 
         return $pass;
@@ -101,11 +102,11 @@ class Report implements \TYPO3\CMS\Reports\StatusProviderInterface
     {
         $pass = function_exists('proc_open');
 
-        $this->reports[] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Reports\Status::class,
+        $this->reports[] = GeneralUtility::makeInstance(Status::class,
             $this->languageService->getLL('html2pdf.report.check.proc_open.title'),
             $pass ? 'OK' : 'Error',
             $pass ? '' : $this->languageService->getLL('html2pdf.report.check.proc_open.description'),
-            $pass ? \TYPO3\CMS\Reports\Status::OK : \TYPO3\CMS\Reports\Status::ERROR
+            $pass ? Status::OK : Status::ERROR
         );
 
         return $pass;
@@ -121,14 +122,14 @@ class Report implements \TYPO3\CMS\Reports\StatusProviderInterface
      */
     protected function checkBinary() : bool
     {
-        $binary = \Walther\Html2Pdf\Config::getBinaryPath();
+        $binary = Configuration::getBinaryPath();
 
         if (empty($binary)) {
-            $this->reports[] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Reports\Status::class,
+            $this->reports[] = GeneralUtility::makeInstance(Status::class,
                 $this->languageService->getLL('html2pdf.report.check.binary.title'),
                 'Error',
                 $this->languageService->getLL('html2pdf.report.check.binary.description'),
-                \TYPO3\CMS\Reports\Status::ERROR
+                Status::ERROR
             );
             return false;
         }
@@ -147,18 +148,18 @@ class Report implements \TYPO3\CMS\Reports\StatusProviderInterface
         $pass = $returnCode <= 1;
 
         if ($pass) {
-            $this->reports[] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Reports\Status::class,
+            $this->reports[] = GeneralUtility::makeInstance(Status::class,
                 $this->languageService->getLL('html2pdf.report.check.generation.success.title'),
                 $binary,
                 $this->languageService->getLL('html2pdf.report.check.generation.success.description'),
-                \TYPO3\CMS\Reports\Status::OK
+                Status::OK
             );
         } else {
-            $this->reports[] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Reports\Status::class,
+            $this->reports[] = GeneralUtility::makeInstance(Status::class,
                 $this->languageService->getLL('html2pdf.report.check.generation.error.title'),
                 $stderr,
                 $this->languageService->getLL('html2pdf.report.check.generation.error.description') . $returnCode,
-                \TYPO3\CMS\Reports\Status::ERROR
+                Status::ERROR
             );
         }
 
@@ -179,25 +180,25 @@ class Report implements \TYPO3\CMS\Reports\StatusProviderInterface
                 $architecture = exec('uname -m');
                 $os = $architecture ? sprintf('%s (%s)', PHP_OS, $architecture) : PHP_OS;
             }
-            $this->reports[] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Reports\Status::class,
+            $this->reports[] = GeneralUtility::makeInstance(Status::class,
                 $this->languageService->getLL('html2pdf.report.check.operating_system.title'),
                 $os,
                 '',
-                \TYPO3\CMS\Reports\Status::NOTICE
+                Status::NOTICE
             );
         } elseif (in_array(strtolower($os), ['windows', 'darwin'])) {
-            $this->reports[] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Reports\Status::class,
+            $this->reports[] = GeneralUtility::makeInstance(Status::class,
                 $this->languageService->getLL('html2pdf.report.check.operating_system.title'),
                 $os,
                 $this->languageService->getLL('html2pdf.report.check.operating_system.missing.' . strtolower(PHP_OS) . '.description'),
-                \TYPO3\CMS\Reports\Status::INFO
+                Status::INFO
             );
         } else {
-            $this->reports[] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Reports\Status::class,
+            $this->reports[] = GeneralUtility::makeInstance(Status::class,
                 $this->languageService->getLL('html2pdf.report.check.operating_system.title'),
                 $os,
                 $this->languageService->getLL('html2pdf.report.check.operating_system.missing.unknown.description'),
-                \TYPO3\CMS\Reports\Status::INFO
+                Status::INFO
             );
         }
     }
@@ -213,18 +214,18 @@ class Report implements \TYPO3\CMS\Reports\StatusProviderInterface
         $hookCount = count($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['contentPostProc-output']);
 
         if ($hookCount > 1) {
-            $this->reports[] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Reports\Status::class,
+            $this->reports[] = GeneralUtility::makeInstance(Status::class,
                 $this->languageService->getLL('html2pdf.report.check.contentPostProc.title'),
                 sprintf('%d ' . $this->languageService->getLL('html2pdf.report.check.contentPostProc.used.by'), $hookCount),
                 $this->languageService->getLL('html2pdf.report.check.contentPostProc.used.description') . '<br /><ol><li>' . $hooking . '</li></ol>',
-                \TYPO3\CMS\Reports\Status::INFO
+                Status::INFO
             );
         } else {
-            $this->reports[] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Reports\Status::class,
+            $this->reports[] = GeneralUtility::makeInstance(Status::class,
                 $this->languageService->getLL('html2pdf.report.check.contentPostProc.title'),
                 'OK',
                 $this->languageService->getLL('html2pdf.report.check.contentPostProc.description'),
-                \TYPO3\CMS\Reports\Status::OK
+                Status::OK
             );
         }
     }
@@ -240,18 +241,18 @@ class Report implements \TYPO3\CMS\Reports\StatusProviderInterface
         $hookCount = count($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['pageIndexing']);
 
         if ($hookCount > 1) {
-            $this->reports[] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Reports\Status::class,
+            $this->reports[] = GeneralUtility::makeInstance(Status::class,
                 $this->languageService->getLL('html2pdf.report.check.pageIndexing.title'),
                 sprintf('%d ' . $this->languageService->getLL('html2pdf.report.check.pageIndexing.used.by'), $hookCount),
                 $this->languageService->getLL('html2pdf.report.check.pageIndexing.used.description') . '<br /><ol><li>' . $hooking . '</li></ol>',
-                \TYPO3\CMS\Reports\Status::INFO
+                Status::INFO
             );
         } else {
-            $this->reports[] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Reports\Status::class,
+            $this->reports[] = GeneralUtility::makeInstance(Status::class,
                 $this->languageService->getLL('html2pdf.report.check.pageIndexing.title'),
                 'OK',
                 $this->languageService->getLL('html2pdf.report.check.pageIndexing.description'),
-                \TYPO3\CMS\Reports\Status::OK
+                Status::OK
             );
         }
     }

@@ -8,8 +8,6 @@ html2pdf {
 
         absRefPrefix = /
 
-        baseURL = http://www.website.com/
-
         additionalHeaders {
 
             10 {
@@ -38,7 +36,7 @@ html2pdf {
             }
 
             60 {
-                header = X-Powered-By: wkhtmltopdf
+                header = X-Powered-By: html2pdf
                 replace = 1
             }
         }
@@ -95,10 +93,10 @@ html2pdf {
                 # options without values
                 #header-line =
                 #footer-line =
-                lowquality =
+                #lowquality =
                 enable-javascript =
                 no-outline =
-                grayscale =
+                #grayscale =
             }
         }
     }

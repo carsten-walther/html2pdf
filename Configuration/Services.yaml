@@ -1,0 +1,10 @@
+# Configuration/Services.yaml
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: true
+
+  Walther\Html2pdf\:
+    resource: '../Classes/*'

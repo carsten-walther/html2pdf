@@ -1,12 +1,19 @@
 <?php
 
-namespace Walther\Html2Pdf;
+namespace Walther\Html2pdf\Controller;
+
+use RuntimeException;
+use TYPO3\CMS\Core\Error\Http\PageNotFoundException;
+use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Walther\Html2pdf\Converter\Converter;
 
 /**
- * Class Controller
- * @package Walther\Html2Pdf
+ * Class Html2pdfController
+ *
+ * @package Walther\Html2pdf\Controller
  */
-class Controller
+class Html2pdfController
 {
     /**
      * @var \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController
@@ -14,22 +21,18 @@ class Controller
     protected $pObj;
 
     /**
-     * @var \TYPO3\CMS\Extbase\Object\ObjectManager
-     */
-    protected $objectManager;
-
-    /**
      * @var \TYPO3\CMS\Core\Localization\LanguageService
      */
     protected $languageService;
 
     /**
-     * Report constructor.
+     * Html2pdfController constructor.
+     *
+     * @param \TYPO3\CMS\Core\Localization\LanguageService $languageService
      */
-    public function __construct()
+    public function __construct(LanguageService $languageService)
     {
-        $this->objectManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\Object\ObjectManager::class);
-        $this->languageService = $this->objectManager->get(\TYPO3\CMS\Core\Localization\LanguageService::class);
+        $this->languageService = $languageService;
         $this->languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
     }
 
@@ -42,7 +45,6 @@ class Controller
      * @param $pObj
      *
      * @throws \TYPO3\CMS\Core\Error\Http\PageNotFoundException
-     * @throws \TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException
      */
     public function hookOutput(&$params, $pObj) : void
     {
@@ -85,6 +87,8 @@ class Controller
 
         //if: tx_html2pdf was explicitly disabled
         $this->throw404($this->languageService->getLL('html2pdf.controller.throw404'));
+
+        return false;
     }
 
     /**
@@ -98,28 +102,22 @@ class Controller
      */
     protected function throw404($message) : void
     {
-        if (class_exists(\TYPO3\CMS\Core\Error\Http\PageNotFoundException::class)) {
-            //if: TYPO3 4.6 and above
-            throw new \TYPO3\CMS\Core\Error\Http\PageNotFoundException($message);
+        if (class_exists(PageNotFoundException::class)) {
+            throw new PageNotFoundException($message);
         }
-
-        //if: TYPO3 4.5 and below
-        $this->pObj->pageNotFoundAndExit($message);
     }
 
     /**
      * processHook
      *
      * process a hook
-     *
-     * @throws \TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException
      */
     protected function processHook() : void
     {
-        $converter = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(Converter::class);
+        $converter = GeneralUtility::makeInstance(Converter::class);
 
         if (!$converter) {
-            throw new \RuntimeException($this->languageService->getLL('html2pdf.controller.converter.init.error'));
+            throw new RuntimeException($this->languageService->getLL('html2pdf.controller.converter.init.error'));
         }
 
         $this->pObj->content = $converter->convert($this->pObj->content, $this->getBinaryOptions());
@@ -136,6 +134,7 @@ class Controller
             // if: configuration is invalid
             return [];
         }
+
         return $this->pObj->config['config']['tx_html2pdf.']['binOptions.'];
     }
 
@@ -147,7 +146,6 @@ class Controller
      * @param $pObj
      *
      * @throws \TYPO3\CMS\Core\Error\Http\PageNotFoundException
-     * @throws \TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException
      */
     public function hook_indexContent($pObj) : void
     {
