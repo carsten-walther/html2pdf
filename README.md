@@ -24,8 +24,7 @@ Configuration
 
 What's next?
 ------------
-Some things on the roadmap:
-- Add documentation
+...
 
 Sponsoring
 ----------
