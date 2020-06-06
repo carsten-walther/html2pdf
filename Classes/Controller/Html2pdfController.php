@@ -45,6 +45,7 @@ class Html2pdfController
      * @param $pObj
      *
      * @throws \TYPO3\CMS\Core\Error\Http\PageNotFoundException
+     * @throws \TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException
      */
     public function hookOutput(&$params, $pObj) : void
     {
@@ -111,6 +112,8 @@ class Html2pdfController
      * processHook
      *
      * process a hook
+     *
+     * @throws \TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException
      */
     protected function processHook() : void
     {
@@ -145,7 +148,7 @@ class Html2pdfController
      *
      * @param $pObj
      *
-     * @throws \TYPO3\CMS\Core\Error\Http\PageNotFoundException
+     * @throws \TYPO3\CMS\Core\Error\Http\PageNotFoundException|\TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException
      */
     public function hook_indexContent($pObj) : void
     {

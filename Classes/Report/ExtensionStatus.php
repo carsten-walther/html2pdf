@@ -136,14 +136,39 @@ class ExtensionStatus implements StatusProviderInterface
 
         $cmd = escapeshellcmd($binary);
 
-        $proc = proc_open($cmd, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
-        fwrite($pipes[0], '');
-        fclose($pipes[0]);
-        $stdout = stream_get_contents($pipes[1]);
-        fclose($pipes[1]);
-        $stderr = stream_get_contents($pipes[2]);
-        fclose($pipes[2]);
-        $returnCode = proc_close($proc);
+        $specs = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w']
+        ];
+
+        $pipes = [];
+
+        $process = proc_open($cmd, $specs, $pipes);
+
+        $stderr = '';
+        $returnCode = 0;
+
+        if (is_resource($process)) {
+
+            // $pipes now looks like this:
+            // 0 => writeable handle connected to child stdin
+            // 1 => readable handle connected to child stdout
+            // 2 => readable handle connected to child stderr
+
+            fwrite($pipes[0], '');
+            fclose($pipes[0]);
+
+            stream_get_contents($pipes[1]);
+            fclose($pipes[1]);
+
+            $stderr = stream_get_contents($pipes[2]);
+            fclose($pipes[2]);
+
+            // It is important that you close any pipes before calling
+            // proc_close in order to avoid a deadlock
+            $returnCode = proc_close($process);
+        }
 
         $pass = $returnCode <= 1;
 

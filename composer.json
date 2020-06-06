@@ -13,6 +13,8 @@
 	"homepage": "https://carstenwalther.de",
 	"license": "GPL-3.0-or-later",
 	"require": {
+		"ext-dom": "*",
+		"ext-simplexml": "*",
 		"typo3/cms-core": "9.5.0-10.4.99"
 	},
 	"extra": {

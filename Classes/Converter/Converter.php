@@ -2,9 +2,14 @@
 
 namespace Walther\Html2pdf\Converter;
 
+use DOMDocument;
+use DOMXPath;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use TYPO3\CMS\Core\Utility\File\BasicFileUtility;
+use RuntimeException;
+use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException;
+use Walther\Html2pdf\Configuration\Configuration;
 
 /**
  * Class Converter
@@ -21,21 +26,14 @@ class Converter implements LoggerAwareInterface
     protected $languageService;
 
     /**
-     * @var \TYPO3\CMS\Core\Utility\File\BasicFileUtility
-     */
-    protected $basicFileUtility;
-
-    /**
      * Converter constructor.
      *
      * @param \TYPO3\CMS\Core\Localization\LanguageService $languageService
      */
-    public function __construct(\TYPO3\CMS\Core\Localization\LanguageService $languageService, BasicFileUtility $basicFileUtility)
+    public function __construct(LanguageService $languageService)
     {
         $this->languageService = $languageService;
         $this->languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
-
-        $this->basicFileUtility = $basicFileUtility;
     }
 
     /**
@@ -49,10 +47,10 @@ class Converter implements LoggerAwareInterface
      */
     public function convert($input, $options = [])
     {
-        $binary = \Walther\Html2pdf\Configuration\Configuration::getBinaryPath();
+        $binary = Configuration::getBinaryPath();
 
         if (empty($binary)) {
-            throw new \TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException($this->languageService->getLL('html2pdf.converter.binary.error'));
+            throw new InvalidArgumentException($this->languageService->getLL('html2pdf.converter.binary.error'));
         }
 
         $cmd = sprintf('%s %s - -', escapeshellcmd($binary), $this->formatBinaryOptions($options));
@@ -78,7 +76,7 @@ class Converter implements LoggerAwareInterface
             // 1 => readable handle connected to child stdout
             // 2 => readable handle connected to child stderr
 
-            fwrite($pipes[0], $input);
+            fwrite($pipes[0], $this->makeAbsoluteURLs($input));
             fclose($pipes[0]);
 
             $stdout = stream_get_contents($pipes[1]);
@@ -94,19 +92,19 @@ class Converter implements LoggerAwareInterface
 
         if ($returnCode > 1) {
             // usually thrown when an invalid binary is called
-            throw new \RuntimeException($this->languageService->getLL('html2pdf.converter.generator.error.returnCode') . $returnCode);
+            throw new RuntimeException($this->languageService->getLL('html2pdf.converter.generator.error.returnCode') . $returnCode);
         }
 
         $stderrL = strtolower($stderr);
 
         if (strpos($stderrL, 'error') !== false || strpos($stderrL, 'unknown') !== false) {
             $this->logger->error($this->languageService->getLL('html2pdf.converter.generator.error.stderr') . '<pre>' . $stderr . '</pre>');
-            throw new \RuntimeException($this->languageService->getLL('html2pdf.converter.generator.error.stderr'));
+            throw new RuntimeException($this->languageService->getLL('html2pdf.converter.generator.error.stderr'));
         }
 
         if (trim($stdout) === '') {
             $this->logger->error($this->languageService->getLL('html2pdf.converter.generator.error.stdout') . '<pre>' . $stderr . '</pre>');
-            throw new \RuntimeException($this->languageService->getLL('html2pdf.converter.generator.error.stdout'));
+            throw new RuntimeException($this->languageService->getLL('html2pdf.converter.generator.error.stdout'));
         }
 
         return $stdout;
@@ -136,5 +134,80 @@ class Converter implements LoggerAwareInterface
         }
 
         return implode(' ', $return);
+    }
+
+    /**
+     * makeAbsoluteURLs
+     *
+     * add absolute urls to the html output
+     *
+     * @param string $html
+     *
+     * @return string
+     */
+    protected function makeAbsoluteURLs(string $html) : string
+    {
+        if (is_null($html)) {
+            return false;
+        }
+
+        /** @var \TYPO3\CMS\Core\Http\ServerRequest $serverRequest */
+        $serverRequest = $GLOBALS['TYPO3_REQUEST'];
+        $baseURL = $serverRequest->getUri()->getScheme() . '://' . $serverRequest->getUri()->getHost();
+
+        $dom = new DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_use_internal_errors(false);
+        $xpath = new DOMXPath($dom);
+
+        // add base if not exists
+        $baseUrlTag = $dom->getElementsByTagName('base');
+        if ($baseUrlTag->length === 0) {
+            $head = $dom->getElementsByTagName('head')->item(0);
+            if ($head) {
+                $base = $dom->createElement('base');
+                $base->setAttribute('href', $baseURL . '/');
+                if ($head->hasChildNodes()) {
+                    $head->insertBefore($base, $head->firstChild);
+                } else {
+                    $head->appendChild($base);
+                }
+            }
+        }
+
+        // Method #1 - Nested Xpath Queries:
+        $tagsAndAttributes = [
+            'link' => 'href',
+            'script' => 'src',
+            'img' => 'src',
+            'form' => 'action',
+            'a' => 'href'
+        ];
+
+        foreach ($tagsAndAttributes as $tag => $attr) {
+            foreach ($xpath->query("//{$tag}[not(starts-with(@{$attr}, 'http'))]") as $node) {
+                $node->setAttribute($attr, $baseURL . $node->getAttribute($attr));
+            }
+        }
+
+        // Method #2 - Single Xpath Query w/ Condition Block
+        $targets = [
+            "//img[not(starts-with(@src, 'http'))]",
+            "//form[not(starts-with(@action, 'http'))]",
+            "//a[not(starts-with(@href, 'http'))]"
+        ];
+
+        foreach ($xpath->query(implode('|', $targets)) as $node) {
+            if ($src = $node->getAttribute('src')) {
+                $node->setAttribute('src', $baseURL . $src);
+            } elseif ($action = $node->getAttribute('action')) {
+                $node->setAttribute('action', $baseURL . $action);
+            } else {
+                $node->setAttribute('href', $baseURL . $node->getAttribute('href'));
+            }
+        }
+
+        return $dom->saveHTML();
     }
 }
