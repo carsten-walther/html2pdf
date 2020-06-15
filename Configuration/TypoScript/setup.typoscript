@@ -1,3 +1,4 @@
+html2pdf >
 html2pdf = PAGE
 html2pdf < page
 html2pdf {
