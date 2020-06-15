@@ -33,11 +33,28 @@ class Configuration
      *
      * @param \TYPO3\CMS\Core\Localization\LanguageService $languageService
      */
-    public function __construct(LanguageService $languageService)
-    {
-        self::$languageService = $languageService;
-        self::$languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
-    }
+     public function __construct(LanguageService $languageService = NULL)
+     {
+         self::$languageService = $languageService;
+         if (self::$languageService) {
+             self::$languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
+         }
+     }
+
+     /**
+      * @param \TYPO3\CMS\Core\Localization\LanguageService $languageService
+      *
+      * @return void
+      */
+     public function injectLanguageService(LanguageService $languageService) : void
+     {
+         if (!self::$languageService) {
+             self::$languageService = $languageService;
+             if (self::$languageService) {
+                 self::$languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
+             }
+         }
+     }
 
     /**
      * set

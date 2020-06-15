@@ -30,11 +30,28 @@ class Html2pdfController
      *
      * @param \TYPO3\CMS\Core\Localization\LanguageService $languageService
      */
-    public function __construct(LanguageService $languageService)
-    {
-        $this->languageService = $languageService;
-        $this->languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
-    }
+     public function __construct(LanguageService $languageService = NULL)
+     {
+         $this->languageService = $languageService;
+         if ($this->languageService) {
+             $this->languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
+         }
+     }
+
+     /**
+      * @param \TYPO3\CMS\Core\Localization\LanguageService $languageService
+      *
+      * @return void
+      */
+     public function injectLanguageService(LanguageService $languageService) : void
+     {
+         if (!$this->languageService) {
+             $this->languageService = $languageService;
+             if ($this->languageService) {
+                 $this->languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
+             }
+         }
+     }
 
     /**
      * hookOutput
