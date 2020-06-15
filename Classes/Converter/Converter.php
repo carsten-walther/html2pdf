@@ -8,6 +8,8 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use RuntimeException;
 use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException;
 use Walther\Html2pdf\Configuration\Configuration;
 
@@ -30,28 +32,14 @@ class Converter implements LoggerAwareInterface
      *
      * @param \TYPO3\CMS\Core\Localization\LanguageService $languageService
      */
-     public function __construct(LanguageService $languageService = NULL)
-     {
-         $this->languageService = $languageService;
-         if ($this->languageService) {
-             $this->languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
-         }
-     }
-
-     /**
-      * @param \TYPO3\CMS\Core\Localization\LanguageService $languageService
-      *
-      * @return void
-      */
-     public function injectLanguageService(LanguageService $languageService) : void
-     {
-         if (!$this->languageService) {
-             $this->languageService = $languageService;
-             if ($this->languageService) {
-                 $this->languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
-             }
-         }
-     }
+    public function __construct(LanguageService $languageService = NULL)
+    {
+        $this->languageService = $languageService;
+        if (!$this->languageService) {
+            $this->languageService = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Localization\LanguageService::class);
+        }
+        $this->languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
+    }
 
     /**
      * convert
