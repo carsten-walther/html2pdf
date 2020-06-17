@@ -9,7 +9,6 @@ use Psr\Log\LoggerAwareTrait;
 use RuntimeException;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException;
 use Walther\Html2pdf\Configuration\Configuration;
 

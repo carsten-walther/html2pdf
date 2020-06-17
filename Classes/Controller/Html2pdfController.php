@@ -6,6 +6,8 @@ use RuntimeException;
 use TYPO3\CMS\Core\Error\Http\PageNotFoundException;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder;
+use TYPO3\CMS\Extbase\Object\ObjectManager;
 use Walther\Html2pdf\Converter\Converter;
 
 /**
@@ -124,7 +126,21 @@ class Html2pdfController
             throw new RuntimeException($this->languageService->getLL('html2pdf.controller.converter.init.error'));
         }
 
-        $this->pObj->content = $converter->convert($this->pObj->content, $this->getBinaryOptions());
+        /** @var ObjectManager $objectManager */
+        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+
+        /** @var UriBuilder $uriBuilder */
+        $uriBuilder = $objectManager->get(UriBuilder::class);
+        $url = $uriBuilder
+            ->reset()
+            ->setTargetPageUid($this->pObj->id)
+            ->setTargetPageType(8081)
+            ->setCreateAbsoluteUri(true)
+            ->buildFrontendUri();
+
+        $content = file_get_contents($url);
+
+        $this->pObj->content = $converter->convert($content, $this->getBinaryOptions());
     }
 
     /**

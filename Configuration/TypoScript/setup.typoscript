@@ -1,4 +1,17 @@
-html2pdf >
+lib.pdfLinkUrl = TEXT
+lib.pdfLinkUrl {
+    if.isFalse.data = TSFE:no_cache // field: no_search
+    typolink {
+        parameter.data = TSFE:id
+        addQueryString = 1
+        addQueryString.method = GET
+        addQueryString.exclude = type
+        additionalParams = &type=8080
+        useCacheHash = 1
+        returnLast = url
+    }
+}
+
 html2pdf = PAGE
 html2pdf < page
 html2pdf {
@@ -78,12 +91,14 @@ html2pdf {
                 page-height = 297
                 page-offset = 0
 
+                viewport-size = 1280x1024
+
                 zoom = 1.0
 
-                dpi = 96
+                dpi = 300
 
-                image-dpi = 96
-                image-quality = 90
+                image-dpi = 300
+                image-quality = 85
 
                 # values in mm
                 margin-bottom = 20
@@ -104,8 +119,8 @@ html2pdf {
                 footer-font-size = 8
                 # values as string
                 footer-left = [date] - [time]
-                footer-center = (C) 2019
-                footer-right = [page] of [topage]
+                footer-center = (C) 2020
+                footer-right = [page]/[topage]
 
                 # options without values
                 #header-line =
@@ -114,6 +129,7 @@ html2pdf {
                 enable-javascript =
                 no-outline =
                 #grayscale =
+                disable-smart-shrinking =
             }
         }
     }
@@ -160,4 +176,18 @@ html2pdf {
             </script>
         )
     }
+
+    #
+    # Overrides
+    #
+
+    # ...
+}
+
+html2pdfRenderer < html2pdf
+html2pdfRenderer {
+
+    typeNum = 8081
+
+    config >
 }
