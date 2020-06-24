@@ -74,6 +74,8 @@ html2pdf {
             enable = 1
             enable.if.isFalse.data = TSFE:no_cache // field:no_cache // field:no_search
 
+            download_instead_preview = 1
+
             binOptions {
 
                 encoding = utf-8

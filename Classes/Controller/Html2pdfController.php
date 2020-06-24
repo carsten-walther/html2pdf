@@ -64,7 +64,20 @@ class Html2pdfController
             return;
         }
 
-        $this->processHook();
+        if (array_key_exists('tx_html2pdf.', $this->pObj->config['config']) && array_key_exists('download_instead_preview', $this->pObj->config['config']['tx_html2pdf.']) && $this->pObj->config['config']['tx_html2pdf.']['download_instead_preview'] == 1) {
+
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="download.pdf"');
+            header('Cache-control: public, must-revalidate, max-age=0');
+            header('Pragma: public');
+            header('Expires: 0');
+            header('X-Powered-By: wkhtmltopdf');
+
+            die($this->processHook());
+            
+        } else {
+            $this->processHook();
+        }
     }
 
     /**
