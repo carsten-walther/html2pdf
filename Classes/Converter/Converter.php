@@ -190,16 +190,16 @@ class Converter implements LoggerAwareInterface
         ];
 
         foreach ($tagsAndAttributes as $tag => $attr) {
-            foreach ($xpath->query("//{$tag}[not(starts-with(@{$attr}, 'http'))]") as $node) {
+            foreach ($xpath->query("//{$tag}[starts-with(@{$attr}, '/')]") as $node) {
                 $node->setAttribute($attr, $baseURL . $node->getAttribute($attr));
             }
         }
 
         // Method #2 - Single Xpath Query w/ Condition Block
         $targets = [
-            "//img[not(starts-with(@src, 'http'))]",
-            "//form[not(starts-with(@action, 'http'))]",
-            "//a[not(starts-with(@href, 'http'))]"
+            "//img[starts-with(@src, '/')]",
+            "//form[starts-with(@action, '/')]",
+            "//a[starts-with(@href, '/')]"
         ];
 
         foreach ($xpath->query(implode('|', $targets)) as $node) {
