@@ -151,9 +151,14 @@ class Html2pdfController
             ->setCreateAbsoluteUri(true)
             ->buildFrontendUri();
 
-        $content = file_get_contents($url);
+        $response = file_get_contents($url, false, stream_context_create([
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+            ],
+        ]));
 
-        $this->pObj->content = $converter->convert($content, $this->getBinaryOptions());
+        $this->pObj->content = $converter->convert($response, $this->getBinaryOptions());
     }
 
     /**
