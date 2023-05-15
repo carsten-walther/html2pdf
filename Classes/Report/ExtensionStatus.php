@@ -1,54 +1,41 @@
 <?php
 
-namespace Walther\Html2pdf\Report;
+namespace CarstenWalther\Html2pdf\Report;
 
 use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException;
 use TYPO3\CMS\Reports\Status;
 use TYPO3\CMS\Reports\StatusProviderInterface;
-use Walther\Html2pdf\Configuration\Configuration;
+use CarstenWalther\Html2pdf\Configuration\Configuration;
 
-/**
- * Class ExtensionStatus
- *
- * @package Walther\Html2pdf\Report
- */
 class ExtensionStatus implements StatusProviderInterface
 {
     /**
      * @var array
      */
-    protected $reports = [];
+    protected array $reports = [];
 
     /**
-     * @var \TYPO3\CMS\Core\Localization\LanguageService
+     * @var LanguageService
      */
-    protected $languageService;
+    protected mixed $languageService;
 
     /**
-     * ExtensionStatus constructor.
-     *
-     * @param \TYPO3\CMS\Core\Localization\LanguageService $languageService
+     * @param LanguageServiceFactory $languageServiceFactory
      */
-    public function __construct(LanguageService $languageService = NULL)
+    public function __construct(protected readonly LanguageServiceFactory $languageServiceFactory)
     {
-        $this->languageService = $languageService;
-        if (!$this->languageService) {
-            $this->languageService = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Localization\LanguageService::class);
-        }
-        $this->languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
+        $this->languageService = $this->languageServiceFactory->createFromUserPreferences($GLOBALS['BE_USER'] ?? null);
     }
 
     /**
-     * getStatus
-     *
-     * Returns status of filesystem
-     *
-     * @return array
-     * @throws \TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException
+     * @return array|Status[]
+     * @throws InvalidArgumentException
      */
-    public function getStatus() : array
+    public function getStatus(): array
     {
         $this->reports = [];
 
@@ -67,13 +54,9 @@ class ExtensionStatus implements StatusProviderInterface
     }
 
     /**
-     * checkConfiguration
-     *
-     * check if the configuration of the extension is ok
-     *
      * @return bool
      */
-    protected function checkConfiguration() : bool
+    protected function checkConfiguration(): bool
     {
         $pass = false;
 
@@ -85,54 +68,46 @@ class ExtensionStatus implements StatusProviderInterface
         }
 
         $this->reports[] = GeneralUtility::makeInstance(Status::class,
-            $this->languageService->getLL('html2pdf.report.check.configuration.title'),
+            $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.configuration.title'),
             $pass ? 'OK' : 'Error',
-            $pass ? '' : $this->languageService->getLL('html2pdf.report.check.configuration.description'),
-            $pass ? Status::OK : Status::ERROR
+            $pass ? '' : $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.configuration.description'),
+            $pass ? ContextualFeedbackSeverity::OK : ContextualFeedbackSeverity::ERROR
         );
 
         return $pass;
     }
 
     /**
-     * checkProcOpenFunctionExists
-     *
-     * check that proc_open() is not disallowed
-     *
      * @return bool
      */
-    protected function checkProcOpenFunctionExists() : bool
+    protected function checkProcOpenFunctionExists(): bool
     {
         $pass = function_exists('proc_open');
 
         $this->reports[] = GeneralUtility::makeInstance(Status::class,
-            $this->languageService->getLL('html2pdf.report.check.proc_open.title'),
+            $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.proc_open.title'),
             $pass ? 'OK' : 'Error',
-            $pass ? '' : $this->languageService->getLL('html2pdf.report.check.proc_open.description'),
-            $pass ? Status::OK : Status::ERROR
+            $pass ? '' : $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.proc_open.description'),
+            $pass ? ContextualFeedbackSeverity::OK : ContextualFeedbackSeverity::ERROR
         );
 
         return $pass;
     }
 
     /**
-     * checkBinary
-     *
-     * check if the binary can be run
-     *
      * @return bool
-     * @throws \TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
-    protected function checkBinary() : bool
+    protected function checkBinary(): bool
     {
         $binary = Configuration::getBinaryPath();
 
         if (empty($binary)) {
             $this->reports[] = GeneralUtility::makeInstance(Status::class,
-                $this->languageService->getLL('html2pdf.report.check.binary.title'),
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.binary.title'),
                 'Error',
-                $this->languageService->getLL('html2pdf.report.check.binary.description'),
-                Status::ERROR
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.binary.description'),
+                ContextualFeedbackSeverity::ERROR
             );
             return false;
         }
@@ -177,17 +152,17 @@ class ExtensionStatus implements StatusProviderInterface
 
         if ($pass) {
             $this->reports[] = GeneralUtility::makeInstance(Status::class,
-                $this->languageService->getLL('html2pdf.report.check.generation.success.title'),
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.generation.success.title'),
                 $binary,
-                $this->languageService->getLL('html2pdf.report.check.generation.success.description'),
-                Status::OK
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.generation.success.description'),
+                ContextualFeedbackSeverity::OK
             );
         } else {
             $this->reports[] = GeneralUtility::makeInstance(Status::class,
-                $this->languageService->getLL('html2pdf.report.check.generation.error.title'),
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.generation.error.title'),
                 $stderr,
-                $this->languageService->getLL('html2pdf.report.check.generation.error.description') . $returnCode,
-                Status::ERROR
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.generation.error.description') . $returnCode,
+                ContextualFeedbackSeverity::ERROR
             );
         }
 
@@ -195,11 +170,9 @@ class ExtensionStatus implements StatusProviderInterface
     }
 
     /**
-     * checkOperatingSystem
-     *
-     * check the used operating system and give some hint on the binary to use
+     * @return void
      */
-    protected function checkOperatingSystem() : void
+    protected function checkOperatingSystem(): void
     {
         $os = PHP_OS;
 
@@ -209,79 +182,87 @@ class ExtensionStatus implements StatusProviderInterface
                 $os = $architecture ? sprintf('%s (%s)', PHP_OS, $architecture) : PHP_OS;
             }
             $this->reports[] = GeneralUtility::makeInstance(Status::class,
-                $this->languageService->getLL('html2pdf.report.check.operating_system.title'),
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.operating_system.title'),
                 $os,
                 '',
-                Status::NOTICE
+                ContextualFeedbackSeverity::NOTICE
             );
         } elseif (in_array(strtolower($os), ['windows', 'darwin'])) {
             $this->reports[] = GeneralUtility::makeInstance(Status::class,
-                $this->languageService->getLL('html2pdf.report.check.operating_system.title'),
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.operating_system.title'),
                 $os,
-                $this->languageService->getLL('html2pdf.report.check.operating_system.missing.' . strtolower(PHP_OS) . '.description'),
-                Status::INFO
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.operating_system.missing.' . strtolower(PHP_OS) . '.description'),
+                ContextualFeedbackSeverity::INFO
             );
         } else {
             $this->reports[] = GeneralUtility::makeInstance(Status::class,
-                $this->languageService->getLL('html2pdf.report.check.operating_system.title'),
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.operating_system.title'),
                 $os,
-                $this->languageService->getLL('html2pdf.report.check.operating_system.missing.unknown.description'),
-                Status::INFO
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.operating_system.missing.unknown.description'),
+                ContextualFeedbackSeverity::INFO
             );
         }
     }
 
     /**
-     * checkPostProcHook
-     *
-     * check for conflicts with with other extensions using 'contentPostProc-output' of 'tslib/class.tslib_fe.php'
+     * @return void
      */
-    protected function checkPostProcHook() : void
+    protected function checkPostProcHook(): void
     {
-        $hooking = implode('</li><li>', $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['contentPostProc-output']);
+        $hooking = implode('</li><li>',
+            $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['contentPostProc-output']);
         $hookCount = count($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['contentPostProc-output']);
 
         if ($hookCount > 1) {
             $this->reports[] = GeneralUtility::makeInstance(Status::class,
-                $this->languageService->getLL('html2pdf.report.check.contentPostProc.title'),
-                sprintf('%d ' . $this->languageService->getLL('html2pdf.report.check.contentPostProc.used.by'), $hookCount),
-                $this->languageService->getLL('html2pdf.report.check.contentPostProc.used.description') . '<br /><ol><li>' . $hooking . '</li></ol>',
-                Status::INFO
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.contentPostProc.title'),
+                sprintf('%d ' . $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.contentPostProc.used.by'),
+                    $hookCount),
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.contentPostProc.used.description') . '<br /><ol><li>' . $hooking . '</li></ol>',
+                ContextualFeedbackSeverity::INFO
             );
         } else {
             $this->reports[] = GeneralUtility::makeInstance(Status::class,
-                $this->languageService->getLL('html2pdf.report.check.contentPostProc.title'),
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.contentPostProc.title'),
                 'OK',
-                $this->languageService->getLL('html2pdf.report.check.contentPostProc.description'),
-                Status::OK
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.contentPostProc.description'),
+                ContextualFeedbackSeverity::OK
             );
         }
     }
 
     /**
-     * checkPageIndexingHook
-     *
-     * check for conflicts with with other extensions using 'pageIndexing' of 'tslib/class.tslib_fe.php'
+     * @return void
      */
-    protected function checkPageIndexingHook() : void
+    protected function checkPageIndexingHook(): void
     {
-        $hooking = implode('</li><li>', $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['pageIndexing']);
+        $hooking = implode('</li><li>',
+            $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['pageIndexing']);
         $hookCount = count($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['pageIndexing']);
 
         if ($hookCount > 1) {
             $this->reports[] = GeneralUtility::makeInstance(Status::class,
-                $this->languageService->getLL('html2pdf.report.check.pageIndexing.title'),
-                sprintf('%d ' . $this->languageService->getLL('html2pdf.report.check.pageIndexing.used.by'), $hookCount),
-                $this->languageService->getLL('html2pdf.report.check.pageIndexing.used.description') . '<br /><ol><li>' . $hooking . '</li></ol>',
-                Status::INFO
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.pageIndexing.title'),
+                sprintf('%d ' . $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.pageIndexing.used.by'),
+                    $hookCount),
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.pageIndexing.used.description') . '<br /><ol><li>' . $hooking . '</li></ol>',
+                ContextualFeedbackSeverity::INFO
             );
         } else {
             $this->reports[] = GeneralUtility::makeInstance(Status::class,
-                $this->languageService->getLL('html2pdf.report.check.pageIndexing.title'),
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.pageIndexing.title'),
                 'OK',
-                $this->languageService->getLL('html2pdf.report.check.pageIndexing.description'),
-                Status::OK
+                $this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.report.check.pageIndexing.description'),
+                ContextualFeedbackSeverity::OK
             );
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getLabel(): string
+    {
+        return 'HTML2PDF';
     }
 }

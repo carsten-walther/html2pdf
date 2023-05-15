@@ -121,7 +121,7 @@ html2pdf {
                 footer-font-size = 8
                 # values as string
                 footer-left = [date] - [time]
-                footer-center = (C) 2020
+                footer-center = (C) 2023
                 footer-right = [page]/[topage]
 
                 # options without values

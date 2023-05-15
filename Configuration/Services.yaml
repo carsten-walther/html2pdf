@@ -1,10 +1,19 @@
-# Configuration/Services.yaml
 services:
-
   _defaults:
     autowire: true
     autoconfigure: true
-    public: true
+    public: false
 
-  Walther\Html2pdf\:
+  CarstenWalther\Html2pdf\Middleware\Output:
+    public: true
+    arguments:
+      $responseFactory: '@Psr\Http\Message\ResponseFactoryInterface'
+      $requestFactory: '@Psr\Http\Message\RequestFactoryInterface'
+
+  CarstenWalther\Html2pdf\:
     resource: '../Classes/*'
+    exclude: '../Classes/Report'
+
+  CarstenWalther\Html2pdf\Report\ExtensionStatus:
+    tags:
+      - name: reports.status

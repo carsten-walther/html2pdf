@@ -1,60 +1,54 @@
 <?php
 
-namespace Walther\Html2pdf\Converter;
+namespace CarstenWalther\Html2pdf\Converter;
 
 use DOMDocument;
+use DOMException;
 use DOMXPath;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use RuntimeException;
+use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException;
-use Walther\Html2pdf\Configuration\Configuration;
+use CarstenWalther\Html2pdf\Configuration\Configuration;
 
 /**
  * Class Converter
  *
- * @package Walther\Html2pdf\Converter
+ * @package CarstenWalther\Html2pdf\Converter
  */
 class Converter implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
     /**
-     * @var \TYPO3\CMS\Core\Localization\LanguageService
+     * @var LanguageService
      */
-    protected $languageService;
+    protected mixed $languageService;
 
     /**
-     * Converter constructor.
-     *
-     * @param \TYPO3\CMS\Core\Localization\LanguageService $languageService
+     * @param LanguageServiceFactory $languageServiceFactory
      */
-    public function __construct(LanguageService $languageService = NULL)
+    public function __construct(protected readonly LanguageServiceFactory $languageServiceFactory)
     {
-        $this->languageService = $languageService;
-        if (!$this->languageService) {
-            $this->languageService = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Localization\LanguageService::class);
-        }
-        $this->languageService->includeLLFile('EXT:html2pdf/Resources/Private/Language/locallang.xlf');
+        $this->languageService = $this->languageServiceFactory->createFromUserPreferences($GLOBALS['BE_USER'] ?? null);
     }
 
     /**
-     * convert
-     *
-     * @param       $input
+     * @param string $input
      * @param array $options
      *
      * @return bool|string
-     * @throws \TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException|DOMException
      */
-    public function convert($input, $options = [])
+    public function convert(string $input, array $options = []): bool|string
     {
         $binary = Configuration::getBinaryPath();
 
         if (empty($binary)) {
-            throw new InvalidArgumentException($this->languageService->getLL('html2pdf.converter.binary.error'));
+            throw new InvalidArgumentException($this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.converter.binary.error'));
         }
 
         $cmd = sprintf('%s %s - -', escapeshellcmd($binary), $this->formatBinaryOptions($options));
@@ -96,19 +90,19 @@ class Converter implements LoggerAwareInterface
 
         if ($returnCode > 1) {
             // usually thrown when an invalid binary is called
-            throw new RuntimeException($this->languageService->getLL('html2pdf.converter.generator.error.returnCode') . $returnCode);
+            throw new RuntimeException($this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.converter.generator.error.returnCode') . $returnCode);
         }
 
         $stderrL = strtolower($stderr);
 
         if (strpos($stderrL, 'error') !== false || strpos($stderrL, 'unknown') !== false) {
-            $this->logger->error($this->languageService->getLL('html2pdf.converter.generator.error.stderr') . '<pre>' . $stderr . '</pre>');
-            throw new RuntimeException($this->languageService->getLL('html2pdf.converter.generator.error.stderr'));
+            $this->logger->error($this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.converter.generator.error.stderr') . '<pre>' . $stderr . '</pre>');
+            throw new RuntimeException($this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.converter.generator.error.stderr'));
         }
 
         if (trim($stdout) === '') {
-            $this->logger->error($this->languageService->getLL('html2pdf.converter.generator.error.stdout') . '<pre>' . $stderr . '</pre>');
-            throw new RuntimeException($this->languageService->getLL('html2pdf.converter.generator.error.stdout'));
+            $this->logger->error($this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.converter.generator.error.stdout') . '<pre>' . $stderr . '</pre>');
+            throw new RuntimeException($this->languageService->sL('LLL:EXT:html2pdf/Resources/Private/Language/locallang.xlf:html2pdf.converter.generator.error.stdout'));
         }
 
         return $stdout;
@@ -123,7 +117,7 @@ class Converter implements LoggerAwareInterface
      *
      * @return string
      */
-    protected function formatBinaryOptions($options) : string
+    protected function formatBinaryOptions($options): string
     {
         $return = [];
 
@@ -148,14 +142,15 @@ class Converter implements LoggerAwareInterface
      * @param string $html
      *
      * @return string
+     * @throws DOMException
      */
-    protected function makeAbsoluteURLs(string $html) : string
+    protected function makeAbsoluteURLs(string $html): string
     {
-        if (is_null($html)) {
+        if (is_null($html) || empty($html)) {
             return false;
         }
 
-        /** @var \TYPO3\CMS\Core\Http\ServerRequest $serverRequest */
+        /** @var ServerRequest $serverRequest */
         $serverRequest = $GLOBALS['TYPO3_REQUEST'];
         $baseURL = $serverRequest->getUri()->getScheme() . '://' . $serverRequest->getUri()->getHost();
 

@@ -1,5 +1,5 @@
 {
-	"name": "walther/html2pdf",
+	"name": "carsten-walther/html2pdf",
 	"type": "typo3-cms-extension",
 	"description": "A wrapper to let TYPO3 generate PDF files from html pages. Uses wkhtmltopdf, a binary that is using the print functionality of the webkit render engine to create PDFs.",
 	"keywords": [
@@ -14,8 +14,9 @@
 	"license": "GPL-3.0-or-later",
 	"require": {
 		"ext-dom": "*",
+		"ext-libxml": "*",
 		"ext-simplexml": "*",
-		"typo3/cms-core": "^9.5 || ^10"
+		"typo3/cms-core": "^9.5 || ^10.4 || ^11.5 || ^12.4"
 	},
 	"extra": {
 		"typo3/cms": {
@@ -24,10 +25,10 @@
 	},
 	"autoload" : {
 		"psr-4" : {
-			"Walther\\Html2pdf\\" : "Classes/"
+			"CarstenWalther\\Html2pdf\\" : "Classes/"
 		}
 	},
-	"minimum-stability" : "beta",
+	"minimum-stability" : "stable",
 	"authors" : [{
 		"name" : "Carsten Walther",
 		"email" : "walther.carsten@web.de"
