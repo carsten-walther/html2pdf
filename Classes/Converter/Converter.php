@@ -14,34 +14,20 @@ use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException;
 use CarstenWalther\Html2pdf\Configuration\Configuration;
 
-/**
- * Class Converter
- *
- * @package CarstenWalther\Html2pdf\Converter
- */
 class Converter implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    /**
-     * @var LanguageService
-     */
-    protected mixed $languageService;
+    protected LanguageService $languageService;
 
-    /**
-     * @param LanguageServiceFactory $languageServiceFactory
-     */
     public function __construct(protected readonly LanguageServiceFactory $languageServiceFactory)
     {
         $this->languageService = $this->languageServiceFactory->createFromUserPreferences($GLOBALS['BE_USER'] ?? null);
     }
 
     /**
-     * @param string $input
-     * @param array $options
-     *
-     * @return bool|string
-     * @throws InvalidArgumentException|DOMException
+     * @throws DOMException
+     * @throws InvalidArgumentException
      */
     public function convert(string $input, array $options = []): bool|string
     {
@@ -108,15 +94,6 @@ class Converter implements LoggerAwareInterface
         return $stdout;
     }
 
-    /**
-     * formatBinaryOptions
-     *
-     * format and escape all options for the binary call
-     *
-     * @param $options
-     *
-     * @return string
-     */
     protected function formatBinaryOptions($options): string
     {
         $return = [];
@@ -135,18 +112,11 @@ class Converter implements LoggerAwareInterface
     }
 
     /**
-     * makeAbsoluteURLs
-     *
-     * add absolute urls to the html output
-     *
-     * @param string $html
-     *
-     * @return string
      * @throws DOMException
      */
     protected function makeAbsoluteURLs(string $html): string
     {
-        if (is_null($html) || empty($html)) {
+        if (empty($html)) {
             return false;
         }
 

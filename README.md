@@ -14,17 +14,20 @@ About the extension
 -------------------
 This extension will give you the possibility to print pages as pdf.
 
+How to install?
+---------------
+
+Just call ```composer req carsten-walther/html2pdf``` or install the extension via the extension manager.
+
 How to use it?
 --------------
-...
+
+html2pdf provides a special page type with typeNum 8080. Generate a link and attach this page type to the GET parameters.
 
 Configuration
 -------------
-...
 
-What's next?
-------------
-...
+Install wkhtmltopdf in your server environment or use custom versions for your needs. Select the version in extension configuration settings in the Install-Tool.
 
 Sponsoring
 ----------

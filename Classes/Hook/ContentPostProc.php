@@ -11,9 +11,6 @@ use TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException as Inva
 class ContentPostProc
 {
     /**
-     * @param array $parameters
-     * @param TypoScriptFrontendController $tsfe
-     * @return void
      * @throws DOMException
      * @throws InvalidArgumentExceptionAlias
      */

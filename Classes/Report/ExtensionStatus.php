@@ -2,10 +2,12 @@
 
 namespace CarstenWalther\Html2pdf\Report;
 
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException;
 use TYPO3\CMS\Reports\Status;
 use TYPO3\CMS\Reports\StatusProviderInterface;
@@ -13,28 +15,15 @@ use CarstenWalther\Html2pdf\Configuration\Configuration;
 
 class ExtensionStatus implements StatusProviderInterface
 {
-    /**
-     * @var array
-     */
     protected array $reports = [];
 
-    /**
-     * @var LanguageService
-     */
-    protected mixed $languageService;
+    protected LanguageService $languageService;
 
-    /**
-     * @param LanguageServiceFactory $languageServiceFactory
-     */
     public function __construct(protected readonly LanguageServiceFactory $languageServiceFactory)
     {
         $this->languageService = $this->languageServiceFactory->createFromUserPreferences($GLOBALS['BE_USER'] ?? null);
     }
 
-    /**
-     * @return array|Status[]
-     * @throws InvalidArgumentException
-     */
     public function getStatus(): array
     {
         $this->reports = [];
@@ -47,15 +36,17 @@ class ExtensionStatus implements StatusProviderInterface
         }
 
         $this->checkOperatingSystem();
-        $this->checkPostProcHook();
-        $this->checkPageIndexingHook();
+
+        $typo3Version = GeneralUtility::makeInstance(Typo3Version::class);
+
+        if ($typo3Version->getMajorVersion() < 12) {
+            $this->checkPostProcHook();
+            $this->checkPageIndexingHook();
+        }
 
         return $this->reports;
     }
 
-    /**
-     * @return bool
-     */
     protected function checkConfiguration(): bool
     {
         $pass = false;
@@ -77,9 +68,6 @@ class ExtensionStatus implements StatusProviderInterface
         return $pass;
     }
 
-    /**
-     * @return bool
-     */
     protected function checkProcOpenFunctionExists(): bool
     {
         $pass = function_exists('proc_open');
@@ -94,10 +82,6 @@ class ExtensionStatus implements StatusProviderInterface
         return $pass;
     }
 
-    /**
-     * @return bool
-     * @throws InvalidArgumentException
-     */
     protected function checkBinary(): bool
     {
         $binary = Configuration::getBinaryPath();
@@ -169,9 +153,6 @@ class ExtensionStatus implements StatusProviderInterface
         return $pass;
     }
 
-    /**
-     * @return void
-     */
     protected function checkOperatingSystem(): void
     {
         $os = PHP_OS;
@@ -204,9 +185,6 @@ class ExtensionStatus implements StatusProviderInterface
         }
     }
 
-    /**
-     * @return void
-     */
     protected function checkPostProcHook(): void
     {
         $hooking = implode('</li><li>',
@@ -231,9 +209,6 @@ class ExtensionStatus implements StatusProviderInterface
         }
     }
 
-    /**
-     * @return void
-     */
     protected function checkPageIndexingHook(): void
     {
         $hooking = implode('</li><li>',
@@ -258,9 +233,6 @@ class ExtensionStatus implements StatusProviderInterface
         }
     }
 
-    /**
-     * @return string
-     */
     public function getLabel(): string
     {
         return 'HTML2PDF';

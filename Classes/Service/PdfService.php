@@ -11,41 +11,27 @@ use TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException;
 
 class PdfService
 {
-    /**
-     * @var array|null
-     */
     private ?array $pluginConfiguration;
 
-    /**
-     * @param array $tsfeConfigArray
-     */
     public function __construct(array $tsfeConfigArray)
     {
         $configuration = GeneralUtility::removeDotsFromTS($tsfeConfigArray);
         $this->pluginConfiguration = $configuration['tx_html2pdf'] ?? [];
     }
 
-    /**
-     * @return bool
-     */
     public function isEnabled() : bool
     {
         return array_key_exists('enable', $this->pluginConfiguration) && $this->pluginConfiguration['enable'];
     }
 
-    /**
-     * @return array
-     */
     private function getBinaryOptions() : array
     {
         return array_key_exists('binOptions', $this->pluginConfiguration) ? $this->pluginConfiguration['binOptions'] : [];
     }
 
     /**
-     * @param string $content
-     *
-     * @return string
-     * @throws InvalidArgumentException|DOMException
+     * @throws DOMException
+     * @throws InvalidArgumentException
      */
     public function generatePdf(string $content) : string
     {

@@ -9,35 +9,17 @@ use TYPO3\CMS\Install\FolderStructure\Exception\InvalidArgumentException;
 
 class Configuration
 {
-    /**
-     * EXTENSION_KEY
-     */
     public const EXTENSION_KEY = 'html2pdf';
 
-    /**
-     * @var array
-     */
     protected static array $data = [];
 
-    /**
-     * @var LanguageService
-     */
     protected static LanguageService $languageService;
 
-    /**
-     * @param LanguageServiceFactory $languageServiceFactory
-     */
     public function __construct(protected readonly LanguageServiceFactory $languageServiceFactory)
     {
         self::$languageService = $this->languageServiceFactory->createFromUserPreferences($GLOBALS['BE_USER'] ?? null);
     }
 
-    /**
-     * @param mixed $name
-     * @param $value
-     * @return void
-     * @throws InvalidArgumentException
-     */
     public static function set(mixed $name, $value = null): void
     {
         if (is_string($name)) {
@@ -50,7 +32,6 @@ class Configuration
     }
 
     /**
-     * @return mixed
      * @throws InvalidArgumentException
      */
     public static function getBinaryPath(): mixed
@@ -63,8 +44,6 @@ class Configuration
     }
 
     /**
-     * @param string $name
-     * @return mixed
      * @throws InvalidArgumentException
      */
     public static function get(string $name): mixed
@@ -76,9 +55,6 @@ class Configuration
         return self::$data[$name];
     }
 
-    /**
-     * @return void
-     */
     protected static function init(): void
     {
         if (empty(self::$data)) {
@@ -86,10 +62,6 @@ class Configuration
         }
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     */
     public static function exists(string $name): bool
     {
         self::init();
